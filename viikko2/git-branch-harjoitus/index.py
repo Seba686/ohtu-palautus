@@ -1,5 +1,5 @@
 # tehdään alussa importit
-
+# 232
 from logger import logger
 from summa import summa
 from erotus import erotus
