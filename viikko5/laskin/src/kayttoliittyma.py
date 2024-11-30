@@ -8,11 +8,56 @@ class Komento(Enum):
     NOLLAUS = 3
     KUMOA = 4
 
+class Summa:
+    def __init__(self, sovelluslogiikka, lue_syote):
+        self.tmp = 0 
+        self.sovelluslogiikka = sovelluslogiikka
+        self.lue_syote = lue_syote
+
+    def suorita(self):
+        self.tmp = self.sovelluslogiikka.arvo()
+        self.sovelluslogiikka.plus(self.lue_syote())
+
+
+class Erotus:
+    def __init__(self, sovelluslogiikka, lue_syote):
+        self.tmp = 0 
+        self.sovelluslogiikka = sovelluslogiikka
+        self.lue_syote = lue_syote
+
+    def suorita(self):
+        self.tmp = self.sovelluslogiikka.arvo()
+        self.sovelluslogiikka.miinus(self.lue_syote())
+
+    def kumoa(self):
+        self.sovelluslogiikka.aseta_arvo(self.tmp)
+
+class Nollaus:
+    def __init__(self, sovelluslogiikka):
+        self.sovelluslogiikka = sovelluslogiikka
+
+    def suorita(self):
+        self.sovelluslogiikka.nollaa()
+
+class Kumoa:
+    def __init__(self, sovelluslogiikka,lue_komentoolio):
+        self.komentoolio = lue_komentoolio()
+        
+        self.sovelluslogiikka = sovelluslogiikka
+
+    def suorita(self):
+        self.komentoolio.kumoa()
 
 class Kayttoliittyma:
     def __init__(self, sovelluslogiikka, root):
         self._sovelluslogiikka = sovelluslogiikka
         self._root = root
+        self.arvot = []
+        self._komennot = {
+            Komento.SUMMA: Summa(sovelluslogiikka, self._lue_syote),
+            Komento.EROTUS: Erotus(sovelluslogiikka,self._lue_syote),
+            Komento.NOLLAUS: Nollaus(sovelluslogiikka)
+        }
 
     def kaynnista(self):
         self._arvo_var = StringVar()
@@ -54,24 +99,16 @@ class Kayttoliittyma:
         self._nollaus_painike.grid(row=2, column=2)
         self._kumoa_painike.grid(row=2, column=3)
 
+    def _lue_syote(self):
+        return int(self._syote_kentta.get())
+
     def _suorita_komento(self, komento):
-        arvo = 0
+        self._komennot[komento].suorita()
 
-        try:
-            arvo = int(self._syote_kentta.get())
-        except Exception:
-            pass
-
-        if komento == Komento.SUMMA:
-            self._sovelluslogiikka.plus(arvo)
-        elif komento == Komento.EROTUS:
-            self._sovelluslogiikka.miinus(arvo)
-        elif komento == Komento.NOLLAUS:
-            self._sovelluslogiikka.nollaa()
-        elif komento == Komento.KUMOA:
-            pass
-
-        self._kumoa_painike["state"] = constants.NORMAL
+        if not self.arvot:
+            self._kumoa_painike["state"] = constants.DISABLED
+        else:
+            self._kumoa_painike["state"] = constants.NORMAL
 
         if self._sovelluslogiikka.arvo() == 0:
             self._nollaus_painike["state"] = constants.DISABLED
